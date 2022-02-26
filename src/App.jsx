@@ -26,22 +26,35 @@ function App() {
 
   }, [])
 
-  const agregarTarea = e => {
+  const agregarTarea = async (e) => {
     e.preventDefault()
 
     if(!tarea.trim()){
-      console.log('Digite tarea')
       setError('Digite la Tarea')
       return
     }
 
-    setTareas([
-      ...tareas,
-      {id: 1, nombreTarea:tarea}
-    ])
+    try{
+       const db = firebase.firestore()
+       const nuevaTarea = {
+         nombreTarea: tarea
+       }
 
+       const data = await db.collection('tareas').add(nuevaTarea)
+
+       setTareas([
+        ...tareas,
+        {id: data.id, ... nuevaTarea}
+      ])
+  
     setTarea('')
     setError(null)
+
+    }catch(error){
+      console.log(error)
+    }
+
+
   }
 
   const eliminarTarea = id => {
@@ -50,6 +63,7 @@ function App() {
   }
 
   const editar = item => {
+    setError(null)
     console.log(item)
     setModoEdicion(true)
     setTarea(item.nombreTarea)
@@ -124,13 +138,13 @@ function App() {
               (<>
               <button className="btn btn-warning btn-block"
               type='submit'> Editar </button>
-              <button className="btn btn-dark btn-block"
+              <button className="btn btn-dark btn-block mx-2"
               type='submit'
               onChange={()=> cancelar()}> Cancelar </button>
               </>)
               :
               (
-                <button className="btn btn-warning btn-block"
+                <button className="btn btn-dark btn-block"
                 type='submit'> Agregar </button>
               )
             }
