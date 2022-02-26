@@ -1,3 +1,4 @@
+import { specialCharMap } from '@testing-library/user-event/dist/keyboard';
 import React from 'react';
 import { firebase } from './firebase';
 
@@ -63,14 +64,6 @@ function App() {
       return
     }
 
-    const cancelar = () =>{
-      setModoEdicion(false)
-      setTarea('')
-      setId('')
-      setError(null)
-    }
-
-
     const arrayEditado = tareas.map(
       item => item.id === id ? {id:id, nombreTarea:tarea} : item
       )
@@ -81,7 +74,12 @@ function App() {
       setError(null)
       setModoEdicion(false)
   }
-
+  const cancelar = () =>{
+    setModoEdicion(false)
+    setTarea('')
+    setId('')
+    setError(null)
+  }
   return (
     <div className="container mt-3">
       <div className="row">
@@ -103,6 +101,40 @@ function App() {
               ))
             }
           </ul>
+        </div>
+        <div className="col-4">
+          <h4 className="text-center">
+            {
+              modoEdicion ? 'Editar Tarea' : 'Agregar Tarea'
+            }
+          </h4>
+          <form onSubmit={modoEdicion ? editarTarea : agregarTarea}>
+            {
+              error ? <span className="text-danger">{error}</span> : null
+            }
+            <input
+              type="text"
+              className='form-control mb-2'
+              placeholder='Ingresse Tarea'
+              onChange={e => setTarea(e.target.value)}
+              value = {tarea}
+            />
+            {
+              modoEdicion ?
+              (<>
+              <button className="btn btn-warning btn-block"
+              type='submit'> Editar </button>
+              <button className="btn btn-dark btn-block"
+              type='submit'
+              onChange={()=> cancelar()}> Cancelar </button>
+              </>)
+              :
+              (
+                <button className="btn btn-warning btn-block"
+                type='submit'> Agregar </button>
+              )
+            }
+          </form>
         </div>
       </div>
     </div>
