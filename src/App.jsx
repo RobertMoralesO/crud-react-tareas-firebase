@@ -10,18 +10,20 @@ function App() {
   const [id, setId] = React.useState('')
   const [error, setError] = React.useState(null)
 
-  React.useEffect(()=>{
-    const obtenerDatos = async () => {
-      try{
-        const db = firebase.firestore()
-        const data = await db.collection('tareas').get()
-        const arrayData = data.docs.map(doc => ({id: doc.id, ...doc.data()}))
-        setTareas(arrayData)
+  const obtenerDatos = async () => {
+    try{
+      const db = firebase.firestore()
+      const data = await db.collection('tareas').get()
+      const arrayData = data.docs.map(doc => ({id: doc.id, ...doc.data()}))
+      setTareas(arrayData)
 
-      }catch(error){
-        console.log(error)
-      }
+    }catch(error){
+      console.log(error)
     }
+  }
+
+  React.useEffect(()=>{
+    
     obtenerDatos()
 
   }, [])
@@ -47,8 +49,8 @@ function App() {
         {id: data.id, ... nuevaTarea}
       ])
   
-    setTarea('')
-    setError(null)
+        setTarea('')
+        setError(null)
 
     }catch(error){
       console.log(error)
@@ -57,9 +59,17 @@ function App() {
 
   }
 
-  const eliminarTarea = id => {
-    const arrayFiltrado = tareas.filter(item => item.id !== id)
-    setTareas(arrayFiltrado)
+  const eliminarTarea = async(id) => {
+    try{
+      const db = firebase.firestore()
+      await db.collection('tareas').doc(id).delete()
+      const arrayFiltrado = tareas.filter(item => item.id !== id)
+      setTareas(arrayFiltrado)
+
+    }catch(error){
+      console.log(error)
+    }
+
   }
 
   const editar = item => {
@@ -70,23 +80,33 @@ function App() {
     setId(item.id)
   }
 
-  const editarTarea = e => {
+  const editarTarea = async(e) => {
     e.preventDefault()
     if(!tarea.trim()){
-      console.log('Elemento Vacío')
-      setError('Escriba algo por favor...')
+      setError('Digite la tarea')
       return
     }
 
-    const arrayEditado = tareas.map(
-      item => item.id === id ? {id:id, nombreTarea:tarea} : item
+    try{
+      const db = firebase.firestore()
+      await db.collection('tareas').doc(id).update({
+        nombreTarea: tarea
+      })
+      //obtenerDatos()
+
+      const arrayEditado = tareas.map(
+        item => item.id === id ? {id:id, nombreTarea:tarea} : item
       )
-    
+      
       setTareas(arrayEditado)
       setTarea('')
       setId('')
       setError(null)
       setModoEdicion(false)
+
+    }catch(error){
+      console.log(error)
+    }
   }
   const cancelar = () =>{
     setModoEdicion(false)
